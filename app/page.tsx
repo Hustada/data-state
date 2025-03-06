@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 export default function Home() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  // Mock data with more nodes and connections
+  // Mock data matching the scale of mockups
   const mockNodes = [
     {
       id: '1',
@@ -60,35 +60,99 @@ export default function Home() {
       grantsGiven: 7552246,
       taxpayerFunds: 0,
       type: 'low' as const
+    },
+    {
+      id: '6',
+      name: 'COMMUNITY FOUNDATION OF NEW JERSEY',
+      ein: '22-2281783',
+      grossReceipts: 85672341,
+      contributions: 45123890,
+      grantsGiven: 32567890,
+      taxpayerFunds: 8500000,
+      type: 'medium' as const
+    },
+    {
+      id: '7',
+      name: 'NATIONAL PHILANTHROPIC TRUST',
+      ein: '23-7825575',
+      grossReceipts: 2345678901,
+      contributions: 1987654321,
+      grantsGiven: 876543210,
+      taxpayerFunds: 15000000,
+      type: 'high' as const
+    },
+    {
+      id: '8',
+      name: 'AMERICAN RED CROSS',
+      ein: '53-0196605',
+      grossReceipts: 3456789012,
+      contributions: 2345678901,
+      grantsGiven: 1234567890,
+      taxpayerFunds: 25000000,
+      type: 'high' as const
+    },
+    {
+      id: '9',
+      name: 'BOYS & GIRLS CLUBS OF AMERICA',
+      ein: '13-5562976',
+      grossReceipts: 789012345,
+      contributions: 567890123,
+      grantsGiven: 345678901,
+      taxpayerFunds: 5000000,
+      type: 'medium' as const
+    },
+    {
+      id: '10',
+      name: 'HABITAT FOR HUMANITY INTERNATIONAL',
+      ein: '91-1914868',
+      grossReceipts: 456789012,
+      contributions: 345678901,
+      grantsGiven: 234567890,
+      taxpayerFunds: 12000000,
+      type: 'high' as const
+    },
+    {
+      id: '11',
+      name: 'FEEDING AMERICA',
+      ein: '36-3673599',
+      grossReceipts: 2345678901,
+      contributions: 1987654321,
+      grantsGiven: 1654321098,
+      taxpayerFunds: 18000000,
+      type: 'high' as const
+    },
+    {
+      id: '12',
+      name: 'UNITED WAY WORLDWIDE',
+      ein: '13-1635294',
+      grossReceipts: 4567890123,
+      contributions: 3456789012,
+      grantsGiven: 2345678901,
+      taxpayerFunds: 7500000,
+      type: 'medium' as const
     }
   ];
 
   const mockLinks = [
-    {
-      source: '1',
-      target: '2',
-      value: 10134716
-    },
-    {
-      source: '2',
-      target: '3',
-      value: 475607
-    },
-    {
-      source: '3',
-      target: '4',
-      value: 1600109
-    },
-    {
-      source: '4',
-      target: '5',
-      value: 56050
-    },
-    {
-      source: '1',
-      target: '4',
-      value: 31054059
-    }
+    { source: '1', target: '2', value: 10134716 },
+    { source: '2', target: '3', value: 475607 },
+    { source: '3', target: '4', value: 1600109 },
+    { source: '4', target: '5', value: 56050 },
+    { source: '1', target: '4', value: 31054059 },
+    { source: '6', target: '3', value: 2500000 },
+    { source: '7', target: '6', value: 5000000 },
+    { source: '8', target: '7', value: 7500000 },
+    { source: '9', target: '8', value: 1000000 },
+    { source: '10', target: '9', value: 3000000 },
+    { source: '11', target: '10', value: 4500000 },
+    { source: '12', target: '11', value: 6000000 },
+    { source: '1', target: '6', value: 2000000 },
+    { source: '7', target: '12', value: 8000000 },
+    { source: '4', target: '8', value: 12000000 },
+    { source: '2', target: '9', value: 3500000 },
+    { source: '5', target: '10', value: 1500000 },
+    { source: '3', target: '11', value: 2800000 },
+    { source: '6', target: '12', value: 4200000 }
   ];
 
   const connectedNodes = useMemo(() => {

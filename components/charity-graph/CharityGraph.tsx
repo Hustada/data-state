@@ -52,7 +52,7 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
 
     // Create zoom behavior
     const zoom = d3.zoom()
-      .scaleExtent([0.5, 2])
+      .scaleExtent([0.2, 2])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
       });
@@ -62,27 +62,27 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
     // Create container for zoomable content
     const container = svg.append("g");
 
-    // Position nodes in a fixed grid
-    const nodeSpacingX = 400; // Horizontal spacing between nodes
-    const nodeSpacingY = 300; // Vertical spacing between nodes
-    const startX = width * 0.2; // Start 20% from the left
-    const startY = height * 0.2; // Start 20% from the top
+    // Set initial zoom to fit all content
+    const initialScale = 0.4;
+    const initialTransform = d3.zoomIdentity
+      .translate(width / 2, height / 2)
+      .scale(initialScale);
+    svg.call(zoom.transform as any, initialTransform);
 
-    // Calculate positions
-    nodes.forEach((node: any, i) => {
-      const row = Math.floor(i / 3); // 3 nodes per row
-      const col = i % 3;
-      node.x = startX + col * nodeSpacingX;
-      node.y = startY + row * nodeSpacingY;
-      // Fix positions permanently
-      node.fx = node.x;
-      node.fy = node.y;
-    });
-
-    // Create a minimal simulation just for the links
+    // Create the simulation with forces
     const simulation = d3.forceSimulation(nodes as any)
-      .force("link", d3.forceLink(links).id((d: any) => d.id))
-      .alphaDecay(0.1);
+      .force("link", d3.forceLink(links)
+        .id((d: any) => d.id)
+        .distance(300))
+      .force("charge", d3.forceManyBody()
+        .strength(-2000)
+        .distanceMax(1000))
+      .force("collide", d3.forceCollide()
+        .radius(180)
+        .strength(1))
+      .force("x", d3.forceX(width / 2).strength(0.05))
+      .force("y", d3.forceY(height / 2).strength(0.05))
+      .velocityDecay(0.6);
 
     // Create arrow marker for links
     svg.append("defs").append("marker")
@@ -133,7 +133,10 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
       .join("g")
       .attr("class", "node")
       .style("cursor", "pointer")
-      .attr("transform", (d: any) => `translate(${d.x},${d.y})`);
+      .call(d3.drag<any, any>()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
 
     // Add rectangles (cards) to nodes
     nodeGroup.append("rect")
@@ -294,15 +297,26 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
         return !selectedNodeId || isSelected || isConnected ? 1 : 0.3;
       });
 
-    // Update positions on each tick (just for the links)
+    // Update positions on each tick with boundary constraints
     simulation.on("tick", () => {
+      // Add padding to prevent nodes from touching the edges
+      const padding = 200;
+      
+      // Constrain nodes within boundaries
+      nodes.forEach((node: any) => {
+        node.x = Math.max(padding, Math.min(width - padding, node.x));
+        node.y = Math.max(padding, Math.min(height - padding, node.y));
+      });
+
+      // Update link positions with curved paths
       linkGroup.select("path").attr("d", (d: any) => {
         const dx = d.target.x - d.source.x;
         const dy = d.target.y - d.source.y;
-        const dr = Math.sqrt(dx * dx + dy * dy);
+        const dr = Math.sqrt(dx * dx + dy * dy) * 2; // Increase curve
         return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
       });
 
+      // Update link label positions
       linkGroup.select("text").attr("transform", (d: any) => {
         const dx = d.target.x - d.source.x;
         const dy = d.target.y - d.source.y;
@@ -311,7 +325,31 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
         const midY = (d.source.y + d.target.y) / 2;
         return `translate(${midX},${midY}) rotate(${angle})`;
       });
+
+      // Update node positions
+      nodeGroup.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
     });
+
+    // Modified drag functions to maintain some position stability
+    function dragstarted(event: any) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      event.subject.fx = event.subject.x;
+      event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event: any) {
+      event.subject.fx = event.x;
+      event.subject.fy = event.y;
+    }
+
+    function dragended(event: any) {
+      if (!event.active) simulation.alphaTarget(0);
+      // Keep position fixed for a short time after drag
+      setTimeout(() => {
+        event.subject.fx = null;
+        event.subject.fy = null;
+      }, 1000);
+    }
 
     // Add click handler
     nodeGroup.on("click", (event: MouseEvent, d: CharityNode) => {
@@ -328,7 +366,7 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
       <svg
         ref={svgRef}
         className="w-full h-full"
-        style={{ minHeight: '800px' }}
+        style={{ minHeight: '1000px' }}
       />
     </div>
   );
