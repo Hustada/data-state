@@ -63,10 +63,10 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
     const container = svg.append("g");
 
     // Position nodes in a fixed grid
-    const nodeSpacingX = 400; // Horizontal spacing between nodes
-    const nodeSpacingY = 300; // Vertical spacing between nodes
-    const cols = 3; // Number of columns in the grid
-    const rows = Math.ceil(nodes.length / cols); // Number of rows needed
+    const nodeSpacingX = 350; // Slightly reduced horizontal spacing
+    const nodeSpacingY = 250; // Slightly reduced vertical spacing
+    const cols = 4; // Increased to 4 columns for better horizontal spread
+    const rows = Math.ceil(nodes.length / cols); // Will be around 6 rows
 
     // Calculate total grid size
     const gridWidth = nodeSpacingX * (cols - 1);
@@ -88,7 +88,7 @@ export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connec
     });
 
     // Set initial zoom to fit all content
-    const scale = 0.8;
+    const scale = 0.5; // Reduced initial zoom to show more content
     const centerX = width / 2;
     const centerY = height / 2;
     svg.call(zoom.transform as any, d3.zoomIdentity

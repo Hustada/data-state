@@ -130,6 +130,126 @@ export default function Home() {
       grantsGiven: 2345678901,
       taxpayerFunds: 7500000,
       type: 'medium' as const
+    },
+    {
+      id: '13',
+      name: 'GATES FOUNDATION TRUST',
+      ein: '91-1663695',
+      grossReceipts: 5678901234,
+      contributions: 4567890123,
+      grantsGiven: 3456789012,
+      taxpayerFunds: 20000000,
+      type: 'high' as const
+    },
+    {
+      id: '14',
+      name: 'ROCKEFELLER FOUNDATION',
+      ein: '13-1659629',
+      grossReceipts: 789012345,
+      contributions: 678901234,
+      grantsGiven: 567890123,
+      taxpayerFunds: 0,
+      type: 'low' as const
+    },
+    {
+      id: '15',
+      name: 'SALVATION ARMY',
+      ein: '13-5562351',
+      grossReceipts: 3456789012,
+      contributions: 2345678901,
+      grantsGiven: 1234567890,
+      taxpayerFunds: 15000000,
+      type: 'high' as const
+    },
+    {
+      id: '16',
+      name: 'CATHOLIC CHARITIES USA',
+      ein: '53-0196620',
+      grossReceipts: 1234567890,
+      contributions: 987654321,
+      grantsGiven: 876543210,
+      taxpayerFunds: 8000000,
+      type: 'medium' as const
+    },
+    {
+      id: '17',
+      name: 'YMCA OF THE USA',
+      ein: '36-3258696',
+      grossReceipts: 2345678901,
+      contributions: 1876543210,
+      grantsGiven: 1654321098,
+      taxpayerFunds: 12000000,
+      type: 'high' as const
+    },
+    {
+      id: '18',
+      name: 'GOODWILL INDUSTRIES',
+      ein: '53-0196517',
+      grossReceipts: 4321098765,
+      contributions: 3210987654,
+      grantsGiven: 2109876543,
+      taxpayerFunds: 9000000,
+      type: 'medium' as const
+    },
+    {
+      id: '19',
+      name: 'BOYS & GIRLS CLUBS OF AMERICA FOUNDATION',
+      ein: '58-1934512',
+      grossReceipts: 567890123,
+      contributions: 456789012,
+      grantsGiven: 345678901,
+      taxpayerFunds: 6000000,
+      type: 'medium' as const
+    },
+    {
+      id: '20',
+      name: 'AMERICAN CANCER SOCIETY',
+      ein: '13-1788491',
+      grossReceipts: 3456789012,
+      contributions: 2345678901,
+      grantsGiven: 1234567890,
+      taxpayerFunds: 11000000,
+      type: 'high' as const
+    },
+    {
+      id: '21',
+      name: 'MAYO CLINIC',
+      ein: '41-6011702',
+      grossReceipts: 5678901234,
+      contributions: 4567890123,
+      grantsGiven: 3456789012,
+      taxpayerFunds: 25000000,
+      type: 'high' as const
+    },
+    {
+      id: '22',
+      name: 'ST. JUDE CHILDREN\'S RESEARCH HOSPITAL',
+      ein: '62-0646012',
+      grossReceipts: 4567890123,
+      contributions: 3456789012,
+      grantsGiven: 2345678901,
+      taxpayerFunds: 18000000,
+      type: 'high' as const
+    },
+    {
+      id: '23',
+      name: 'UNITED WAY OF GREATER LOS ANGELES',
+      ein: '95-1922010',
+      grossReceipts: 123456789,
+      contributions: 98765432,
+      grantsGiven: 87654321,
+      taxpayerFunds: 3000000,
+      type: 'medium' as const
+    },
+    {
+      id: '24',
+      name: 'SILICON VALLEY COMMUNITY FOUNDATION',
+      ein: '20-5205488',
+      grossReceipts: 6789012345,
+      contributions: 5678901234,
+      grantsGiven: 4567890123,
+      taxpayerFunds: 0,
+      type: 'low' as const
     }
   ];
 
@@ -152,7 +272,30 @@ export default function Home() {
     { source: '2', target: '9', value: 3500000 },
     { source: '5', target: '10', value: 1500000 },
     { source: '3', target: '11', value: 2800000 },
-    { source: '6', target: '12', value: 4200000 }
+    { source: '6', target: '12', value: 4200000 },
+    { source: '13', target: '14', value: 15000000 },
+    { source: '14', target: '15', value: 8000000 },
+    { source: '15', target: '16', value: 5000000 },
+    { source: '16', target: '17', value: 3000000 },
+    { source: '17', target: '18', value: 4000000 },
+    { source: '18', target: '19', value: 2500000 },
+    { source: '19', target: '20', value: 1800000 },
+    { source: '20', target: '21', value: 12000000 },
+    { source: '21', target: '22', value: 9000000 },
+    { source: '22', target: '23', value: 4500000 },
+    { source: '23', target: '24', value: 2000000 },
+    { source: '13', target: '1', value: 20000000 },
+    { source: '15', target: '4', value: 15000000 },
+    { source: '17', target: '7', value: 8000000 },
+    { source: '19', target: '10', value: 5000000 },
+    { source: '21', target: '2', value: 10000000 },
+    { source: '23', target: '5', value: 3000000 },
+    { source: '24', target: '8', value: 7000000 },
+    { source: '14', target: '11', value: 6000000 },
+    { source: '16', target: '3', value: 4000000 },
+    { source: '18', target: '6', value: 5500000 },
+    { source: '20', target: '9', value: 3500000 },
+    { source: '22', target: '12', value: 8500000 }
   ];
 
   const connectedNodes = useMemo(() => {
