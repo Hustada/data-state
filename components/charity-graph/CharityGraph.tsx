@@ -24,9 +24,11 @@ interface CharityGraphProps {
   nodes: CharityNode[];
   links: CharityLink[];
   onNodeClick?: (node: CharityNode) => void;
+  selectedNodeId?: string | null;
+  connectedNodes?: Set<string>;
 }
 
-export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
+export function CharityGraph({ nodes, links, onNodeClick, selectedNodeId, connectedNodes }: CharityGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   const formatCurrency = (amount: number) => {
@@ -50,7 +52,7 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
 
     // Create zoom behavior
     const zoom = d3.zoom()
-      .scaleExtent([0.1, 4])
+      .scaleExtent([0.5, 2])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
       });
@@ -60,13 +62,27 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
     // Create container for zoomable content
     const container = svg.append("g");
 
-    // Create the simulation with more spacing
+    // Position nodes in a fixed grid
+    const nodeSpacingX = 400; // Horizontal spacing between nodes
+    const nodeSpacingY = 300; // Vertical spacing between nodes
+    const startX = width * 0.2; // Start 20% from the left
+    const startY = height * 0.2; // Start 20% from the top
+
+    // Calculate positions
+    nodes.forEach((node: any, i) => {
+      const row = Math.floor(i / 3); // 3 nodes per row
+      const col = i % 3;
+      node.x = startX + col * nodeSpacingX;
+      node.y = startY + row * nodeSpacingY;
+      // Fix positions permanently
+      node.fx = node.x;
+      node.fy = node.y;
+    });
+
+    // Create a minimal simulation just for the links
     const simulation = d3.forceSimulation(nodes as any)
-      .force("link", d3.forceLink(links).id((d: any) => d.id).distance(300))
-      .force("charge", d3.forceManyBody().strength(-3000))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("x", d3.forceX(width / 2).strength(0.1))
-      .force("y", d3.forceY(height / 2).strength(0.1));
+      .force("link", d3.forceLink(links).id((d: any) => d.id))
+      .alphaDecay(0.1);
 
     // Create arrow marker for links
     svg.append("defs").append("marker")
@@ -89,8 +105,14 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
 
     linkGroup.append("path")
       .attr("stroke", "#666")
-      .attr("stroke-opacity", 0.6)
-      .attr("stroke-width", 1)
+      .attr("stroke-opacity", (d: any) => {
+        if (!selectedNodeId) return 0.6;
+        return (d.source.id === selectedNodeId || d.target.id === selectedNodeId) ? 0.8 : 0.1;
+      })
+      .attr("stroke-width", (d: any) => {
+        if (!selectedNodeId) return 1;
+        return (d.source.id === selectedNodeId || d.target.id === selectedNodeId) ? 2 : 1;
+      })
       .attr("fill", "none")
       .attr("marker-end", "url(#arrowhead)");
 
@@ -98,6 +120,10 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
       .attr("dy", -5)
       .attr("fill", "#666")
       .attr("font-size", "10px")
+      .attr("opacity", (d: any) => {
+        if (!selectedNodeId) return 1;
+        return (d.source.id === selectedNodeId || d.target.id === selectedNodeId) ? 1 : 0.1;
+      })
       .text((d: any) => formatCurrency(d.value));
 
     // Create the nodes
@@ -106,10 +132,8 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
       .data(nodes)
       .join("g")
       .attr("class", "node")
-      .call(d3.drag<any, any>()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
+      .style("cursor", "pointer")
+      .attr("transform", (d: any) => `translate(${d.x},${d.y})`);
 
     // Add rectangles (cards) to nodes
     nodeGroup.append("rect")
@@ -119,26 +143,42 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
       .attr("y", -75)
       .attr("rx", 5)
       .attr("fill", (d: CharityNode) => {
+        const isSelected = d.id === selectedNodeId;
+        const isConnected = connectedNodes?.has(d.id);
+        const opacity = !selectedNodeId || isSelected || isConnected ? 0.1 : 0.02;
+        
         switch (d.type) {
           case 'high':
-            return 'rgba(255, 68, 68, 0.1)';
+            return `rgba(255, 68, 68, ${opacity})`;
           case 'medium':
-            return 'rgba(255, 187, 51, 0.1)';
+            return `rgba(255, 187, 51, ${opacity})`;
           default:
-            return 'rgba(153, 153, 153, 0.1)';
+            return `rgba(153, 153, 153, ${opacity})`;
         }
       })
       .attr("stroke", (d: CharityNode) => {
+        const isSelected = d.id === selectedNodeId;
+        const isConnected = connectedNodes?.has(d.id);
+        
         switch (d.type) {
           case 'high':
-            return '#ff4444';
+            return isSelected ? '#ff6666' : '#ff4444';
           case 'medium':
-            return '#ffbb33';
+            return isSelected ? '#ffcc66' : '#ffbb33';
           default:
-            return '#999999';
+            return isSelected ? '#bbbbbb' : '#999999';
         }
       })
-      .attr("stroke-width", 1);
+      .attr("stroke-width", (d: CharityNode) => {
+        const isSelected = d.id === selectedNodeId;
+        const isConnected = connectedNodes?.has(d.id);
+        return isSelected ? 2 : 1;
+      })
+      .attr("stroke-opacity", (d: CharityNode) => {
+        const isSelected = d.id === selectedNodeId;
+        const isConnected = connectedNodes?.has(d.id);
+        return !selectedNodeId || isSelected || isConnected ? 1 : 0.3;
+      });
 
     // Add "High Taxpayer Funds Alert" banner for high type
     const alertGroup = nodeGroup.filter((d: CharityNode) => d.type === 'high')
@@ -246,12 +286,15 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
       .attr("font-size", "11px")
       .attr("font-weight", (d: CharityNode) => d.type === 'high' ? "bold" : "normal");
 
-    // Add click handler
-    nodeGroup.on("click", (event: MouseEvent, d: CharityNode) => {
-      if (onNodeClick) onNodeClick(d);
-    });
+    // Update text opacity based on selection
+    nodeGroup.selectAll("text")
+      .attr("opacity", (d: any) => {
+        const isSelected = d.id === selectedNodeId;
+        const isConnected = connectedNodes?.has(d.id);
+        return !selectedNodeId || isSelected || isConnected ? 1 : 0.3;
+      });
 
-    // Update positions on each tick
+    // Update positions on each tick (just for the links)
     simulation.on("tick", () => {
       linkGroup.select("path").attr("d", (d: any) => {
         const dx = d.target.x - d.source.x;
@@ -268,39 +311,24 @@ export function CharityGraph({ nodes, links, onNodeClick }: CharityGraphProps) {
         const midY = (d.source.y + d.target.y) / 2;
         return `translate(${midX},${midY}) rotate(${angle})`;
       });
-
-      nodeGroup.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
     });
 
-    // Drag functions
-    function dragstarted(event: any) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
-
-    function dragged(event: any) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
-
-    function dragended(event: any) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
+    // Add click handler
+    nodeGroup.on("click", (event: MouseEvent, d: CharityNode) => {
+      if (onNodeClick) onNodeClick(d);
+    });
 
     return () => {
       simulation.stop();
     };
-  }, [nodes, links, onNodeClick]);
+  }, [nodes, links, onNodeClick, selectedNodeId, connectedNodes]);
 
   return (
     <div className="w-full h-full bg-[#0f1117]">
       <svg
         ref={svgRef}
         className="w-full h-full"
-        style={{ minHeight: '600px' }}
+        style={{ minHeight: '800px' }}
       />
     </div>
   );

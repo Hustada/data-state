@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CharityGraph } from '@/components/charity-graph/CharityGraph';
 import { CharitySearch } from '@/components/search/CharitySearch';
 import { CharityCard } from '@/components/ui/charity-card';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  // This is temporary mock data - will be replaced with real data from CSV
+  // Mock data with more nodes and connections
   const mockNodes = [
     {
       id: '1',
@@ -30,6 +30,36 @@ export default function Home() {
       grantsGiven: 182204729,
       taxpayerFunds: 0,
       type: 'low' as const
+    },
+    {
+      id: '3',
+      name: 'UNITED WAY OF BERGEN COUNTY',
+      ein: '22-6028959',
+      grossReceipts: 14789968,
+      contributions: 13338106,
+      grantsGiven: 6713652,
+      taxpayerFunds: 335000,
+      type: 'medium' as const
+    },
+    {
+      id: '4',
+      name: 'VANGUARD CHARITABLE ENDOWMENT PROGRAM',
+      ein: '23-2888152',
+      grossReceipts: 17001668396,
+      contributions: 12359829814,
+      grantsGiven: 1526477194,
+      taxpayerFunds: 0,
+      type: 'low' as const
+    },
+    {
+      id: '5',
+      name: 'MAJOR LEAGUE BASEBALL CHARITIES INC',
+      ein: '13-3346589',
+      grossReceipts: 11851874,
+      contributions: 7354962,
+      grantsGiven: 7552246,
+      taxpayerFunds: 0,
+      type: 'low' as const
     }
   ];
 
@@ -38,8 +68,43 @@ export default function Home() {
       source: '1',
       target: '2',
       value: 10134716
+    },
+    {
+      source: '2',
+      target: '3',
+      value: 475607
+    },
+    {
+      source: '3',
+      target: '4',
+      value: 1600109
+    },
+    {
+      source: '4',
+      target: '5',
+      value: 56050
+    },
+    {
+      source: '1',
+      target: '4',
+      value: 31054059
     }
   ];
+
+  const connectedNodes = useMemo(() => {
+    if (!selectedNodeId) return new Set<string>();
+    
+    const connected = new Set<string>();
+    mockLinks.forEach(link => {
+      if (link.source === selectedNodeId) {
+        connected.add(link.target);
+      }
+      if (link.target === selectedNodeId) {
+        connected.add(link.source);
+      }
+    });
+    return connected;
+  }, [selectedNodeId]);
 
   const handleSearch = (ein: string, keyword: string) => {
     console.log('Searching:', { ein, keyword });
@@ -62,7 +127,7 @@ export default function Home() {
     }
   };
 
-  const selectedCharity = selectedNode ? mockNodes.find(node => node.id === selectedNode) : null;
+  const selectedCharity = selectedNodeId ? mockNodes.find(node => node.id === selectedNodeId) : null;
 
   return (
     <div className="flex min-h-screen bg-[#0f1117]">
@@ -108,7 +173,7 @@ export default function Home() {
           <CharitySearch
             onSearch={handleSearch}
             onDownloadSVG={handleDownloadSVG}
-            totalCharities={39}
+            totalCharities={mockNodes.length}
           />
         </div>
 
@@ -118,7 +183,9 @@ export default function Home() {
             <CharityGraph
               nodes={mockNodes}
               links={mockLinks}
-              onNodeClick={(node) => setSelectedNode(node.id)}
+              onNodeClick={(node) => setSelectedNodeId(node.id)}
+              selectedNodeId={selectedNodeId}
+              connectedNodes={connectedNodes}
             />
           </div>
 
