@@ -243,7 +243,7 @@ export default function Home() {
 
         <div className="flex-1 flex gap-4 p-6 pt-0">
           {/* Graph */}
-          <div className="flex-1 bg-[#1a1d27] rounded-lg overflow-hidden border border-gray-800">
+          <div className="flex-1 bg-[#1f2937] rounded-lg overflow-hidden border border-gray-800">
             <CharityGraph
               nodes={mockNodes}
               links={mockLinks}
